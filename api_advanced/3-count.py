@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """
-Recursive function that queries the Reddit API, parses the titles of all hot posts,
-and prints a sorted count of given keywords (case-insensitive, delimited by spaces).
+Recursive function that queries the Reddit API, parses the titles
+of all hot articles, and prints a sorted count of given keywords.
 """
 
 import requests
@@ -9,21 +9,13 @@ import requests
 
 def count_words(subreddit, word_list, after=None, counts=None):
     """
-    Recursively counts occurrences of words in hot article titles.
-
-    Args:
-        subreddit (str): subreddit to query
-        word_list (list): list of keywords to count
-        after (str): token for next page (used for recursion)
-        counts (dict): accumulator for counts (used for recursion)
+    Recursively counts occurrences of keywords in hot article titles
+    from a given subreddit and prints results sorted as specified.
     """
     if counts is None:
         counts = {}
 
-    if not word_list or not isinstance(subreddit, str):
-        return
-
-    # Normalize keywords (lowercase)
+    # Prepare word list: lowercase, handle duplicates
     keywords = [w.lower() for w in word_list]
 
     url = f"https://www.reddit.com/r/{subreddit}/hot.json"
@@ -33,34 +25,34 @@ def count_words(subreddit, word_list, after=None, counts=None):
     try:
         response = requests.get(url, headers=headers, params=params, allow_redirects=False)
         if response.status_code != 200:
-            return
+            return  # invalid subreddit
         data = response.json().get("data", {})
-        children = data.get("children", [])
+        posts = data.get("children", [])
     except Exception:
         return
 
-    # Count occurrences of exact words (case-insensitive, punctuation excluded)
-    for post in children:
-        title = post.get("data", {}).get("title", "").lower().split()
-        for word in keywords:
-            counts[word] = counts.get(word, 0) + title.count(word)
+    # Count occurrences of keywords in titles
+    for post in posts:
+        title_words = post.get("data", {}).get("title", "").lower().split()
+        for kw in keywords:
+            counts[kw] = counts.get(kw, 0) + title_words.count(kw)
 
-    # Recursion: process next page if exists
+    # Recursive call if there are more pages
     after = data.get("after")
     if after:
         count_words(subreddit, word_list, after, counts)
     else:
         # Base case: no more pages, print results
-        # Aggregate duplicates in word_list
+        # Sum duplicates in word_list
         final_counts = {}
-        for word in keywords:
-            final_counts[word] = final_counts.get(word, 0) + counts.get(word, 0)
+        for kw in keywords:
+            final_counts[kw] = final_counts.get(kw, 0) + counts.get(kw, 0)
 
-        # Sort: descending by count, then ascending alphabetically
+        # Sort: descending by count, then alphabetically
         sorted_counts = sorted(
-            ((w, c) for w, c in final_counts.items() if c > 0),
+            ((k, c) for k, c in final_counts.items() if c > 0),
             key=lambda x: (-x[1], x[0])
         )
 
-        for word, count in sorted_counts:
-            print(f"{word}: {count}")
+        for k, c in sorted_counts:
+            print(f"{k}: {c}")
