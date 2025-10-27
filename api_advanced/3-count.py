@@ -12,9 +12,9 @@ Requirements:
 - Invalid subreddits print nothing
 """
 
-import requests
-import re
 from collections import Counter
+import re
+import requests
 import sys
 
 
