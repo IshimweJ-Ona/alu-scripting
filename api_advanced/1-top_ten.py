@@ -1,40 +1,22 @@
 #!/usr/bin/python3
-"""
-Queries the Reddit API and prints the titles of the first 10 hot posts
-listed for a given subreddit.
-"""
-
+""" Get the titles of the first 10 hot posts for a given subreddit."""
 import requests
-import sys
 
 
 def top_ten(subreddit):
-    """Prints the titles of the first 10 hot posts of a subreddit."""
-    url = "https://www.reddit.com/r/{}/hot.json".format(subreddit)
-    headers = {"User-Agent": "Mozilla/5.0"}
-    params = {"limit": 10}
 
-    try:
-        response = requests.get(url, headers=headers,
-                                params=params, allow_redirects=False)
-        if response.status_code != 200:
-            print("None")
-            return
+    headers = {'User-Agent': 'MyAPI/0.0.1'}
+    subreddit_url = "https://reddit.com/r/{}.json".format(subreddit)
+    response = requests.get(subreddit_url, headers=headers)
 
-        posts = response.json().get("data", {}).get("children", [])
-        if not posts:
-            print("None")
-            return
-
-        for post in posts:
-            print(post.get("data", {}).get("title"))
-
-    except requests.RequestException:
-        print("None")
-
-
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Please pass an argument for the subreddit to search.")
+    if response.status_code == 200:
+        json_data = response.json()
+        for i in range(10):
+            print(
+                json_data.get('data')
+                .get('children')[i]
+                .get('data')
+                .get('title')
+            )
     else:
-        top_ten(sys.argv[1])
+        print(None)
