@@ -13,26 +13,22 @@ def top_ten(subreddit):
     If not a valid subreddit, prints None.
     """
     url = "https://www.reddit.com/r/{}/hot.json".format(subreddit)
-    headers = {
-        'User-Agent': 'python:1-top_ten:v1.0 (by /u/Background_Panic9162)'
-    }
+    headers = {'User-Agent': 'Mozilla/5.0'}
     params = {'limit': 10}
 
-    response = requests.get(url, headers=headers,
-                            params=params, allow_redirects=False)
-
-    # Check for invalid subreddit or API error
-    if response.status_code != 200:
-        print("None")
-        return
-
     try:
-        results = response.json().get("data", {}).get("children", [])
-        if not results:
+        response = requests.get(url, headers=headers,
+                                params=params, allow_redirects=False)
+        if response.status_code != 200:
             print("None")
             return
 
-        for post in results:
+        posts = response.json().get("data", {}).get("children", [])
+        if not posts:
+            print("None")
+            return
+
+        for post in posts:
             print(post.get("data", {}).get("title"))
     except Exception:
         print("None")
