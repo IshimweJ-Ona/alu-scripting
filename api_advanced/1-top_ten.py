@@ -13,9 +13,9 @@ import requests
 import sys
 
 def top_ten(subreddit):
-    url = f"https://www.reddit.com/r/{subreddit}/hot.json?limit=10"
+    url = "https://www.reddit.com/r/{}/hot.json?limit=10".format(subreddit)
     headers = {
-        "User-Agent": "python:top_ten:v1.0 (by /u/Background_Panic9162)"
+        "User-Agent": "python:1-top_ten:v1.0 (by /u/Background_Panic9162)"
     }
 
     try:
